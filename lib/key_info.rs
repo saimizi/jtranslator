@@ -15,6 +15,10 @@ static KEY_INFO: Lazy<KeyInfo> = Lazy::new(|| {
         } else {
             key_file = k;
         }
+    } else {
+        if let Ok(home) = std::env::var("HOME") {
+            key_file = format!("{}/.jtranslator", home);
+        }
     }
 
     jdebug!(key_file = key_file);
