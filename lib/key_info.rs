@@ -1,10 +1,11 @@
 use crate::error::JTranslateError;
 use error_stack::{Report, Result};
-use jlogger_tracing::{jdebug, jerror};
+use jlogger_tracing::{jdebug, jwarn};
 use once_cell::sync::Lazy;
+use serde::{Deserialize, Serialize};
 use std::path::Path;
 
-static KEY_INFO: Lazy<KeyInfo> = Lazy::new(|| {
+static KEY_INFO: Lazy<Option<KeyInfo>> = Lazy::new(|| {
     let mut key_file = String::new();
 
     if let Ok(k) = std::env::var("JTRANSLATE_KEY_FILE") {
@@ -15,27 +16,26 @@ static KEY_INFO: Lazy<KeyInfo> = Lazy::new(|| {
         } else {
             key_file = k;
         }
-    } else {
-        if let Ok(home) = std::env::var("HOME") {
-            key_file = format!("{}/.jtranslator", home);
-        }
+    } else if let Ok(home) = std::env::var("HOME") {
+        key_file = format!("{}/.jtranslator.json", home);
     }
 
     jdebug!(key_file = key_file);
-    let region = "japaneast";
-    let endpoint = "https://api.cognitive.microsofttranslator.com/";
 
     let key_file_path = Path::new(&key_file);
     if key_file_path.is_file() || key_file_path.is_symlink() {
-        if let Ok(key) = std::fs::read_to_string(key_file_path) {
-            return KeyInfo::new(&key, region, endpoint);
+        if let Ok(content) = std::fs::read_to_string(key_file_path) {
+            if let Ok(key_info) = serde_json::from_str(&content) {
+                return Some(key_info);
+            }
         }
     }
 
-    jerror!("Can not access key file. Set JTRANSLATE_KEY_FILE correctly?");
-    KeyInfo::new("INVALID", region, endpoint)
+    jwarn!("Can not retrieve key info. Set JTRANSLATE_KEY_FILE correctly?");
+    None
 });
 
+#[derive(Serialize, Deserialize)]
 pub struct KeyInfo {
     key: String,
     region: String,
@@ -65,9 +65,7 @@ impl KeyInfo {
 }
 
 pub fn key_info() -> Result<&'static KeyInfo, JTranslateError> {
-    if KEY_INFO.key() == "INVALID" {
-        Err(Report::new(JTranslateError::InvalidKey))
-    } else {
-        Ok(&KEY_INFO)
-    }
+    KEY_INFO
+        .as_ref()
+        .ok_or(Report::new(JTranslateError::InvalidKey))
 }
