@@ -1,0 +1,10 @@
+WHITESPACE = { (" " | "\t")}
+MARK = {(NONSPACING_MARK | SPACING_MARK | ENCLOSING_MARK | PUNCTUATION)} 
+MARKS = {MARK+} 
+word ={ (ASCII_ALPHANUMERIC | "_")+ }
+words = { word ~ (WHITESPACE+ ~ word)* }
+headings1 = {("# " | "## " | "### " | "#### " | "##### " | "###### ") ~ words ~ NEWLINE}
+headings2 = {NEWLINE* ~ words ~ NEWLINE ~ ("=="+ | "--"+) ~ NEWLINE}
+headings = { (headings1 | headings2)}
+paragraph = {NEWLINE* ~ (words | MARKS )+ ~ NEWLINE}
+

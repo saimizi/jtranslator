@@ -1,5 +1,6 @@
 pub mod error;
 pub mod key_info;
+pub mod md;
 
 use error::JTranslateError;
 use error_stack::{Report, Result};
