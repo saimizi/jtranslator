@@ -100,18 +100,48 @@ mod tests {
     }
 
     #[test]
+    fn header_marks_1() {
+        let run_test = |test_str| {
+            let pair = MarkdownParser::parse(Rule::HEADER_MARKS, test_str).unwrap();
+            assert_eq!(pair.as_str(), test_str);
+        };
+
+        run_test("#");
+        run_test("+");
+        run_test("-");
+        run_test("@");
+        run_test("_");
+        run_test("/");
+        run_test("\\");
+        run_test("|");
+        run_test("\"");
+        run_test("\'");
+        run_test("`");
+        run_test("~");
+        run_test("?");
+        run_test(".");
+        run_test(",");
+        run_test(";");
+    }
+
+    #[test]
     fn headings1_1() {
         let run_test = |test_str| {
+            jdebug!(test_str=test_str);
             let pair = MarkdownParser::parse(Rule::headings1, test_str).unwrap();
             assert_eq!(pair.as_str(), test_str);
         };
 
+        jdebug!(line=line!());
         run_test("# Hello\n");
+        jdebug!(line=line!());
         run_test("# Hello, world!\n");
+        jdebug!(line=line!());
         run_test("# Hello, world! how are you?\n");
         run_test("# Hello, world! how are you? Great.\n");
         run_test("# 1 Hello, world! how are you? Great.\n");
         run_test("# 1 2 Hello, world! how are you? Great.\n");
+        run_test("# @ # ? - _ + - / \\ ~ , ; . |\n");
     }
 
     #[test]

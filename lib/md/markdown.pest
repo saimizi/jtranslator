@@ -1,7 +1,7 @@
 WHITESPACE = { (" " | "\t")}
 MARK = {(NONSPACING_MARK | SPACING_MARK | ENCLOSING_MARK | PUNCTUATION)} 
 MARKS = {MARK+} 
-HEADER_MARKS = { ("?" | "!" | "." | ",") }
+HEADER_MARKS = { !ASCII_ALPHANUMERIC ~ !NEWLINE ~ ASCII }
 word ={ (ASCII_ALPHANUMERIC | "_")+ }
 words = { word ~ (WHITESPACE+ ~ word)* }
 headings1 = {("# " | "## " | "### " | "#### " | "##### " | "###### ") ~ (words | HEADER_MARKS)+ ~ NEWLINE}
