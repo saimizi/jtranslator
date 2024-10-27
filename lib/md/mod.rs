@@ -1,7 +1,7 @@
-use std::fmt::Display;
+pub mod header;
+pub mod paragraph;
 
-use jlogger_tracing::jdebug;
-use pest::Parser;
+use std::fmt::Display;
 use pest_derive::Parser;
 
 #[derive(Parser)]
@@ -23,100 +23,9 @@ impl Display for Rule {
     }
 }
 
-pub struct Header {
-    text: String,
-    level: usize,
-    alt_syntax: bool,
-}
-
-impl Header {
-    pub fn level(&self) -> usize {
-        self.level
-    }
-
-    pub fn text(&self) -> &str {
-        &self.text
-    }
-
-    pub fn is_alt_syntax(&self) -> bool {
-        self.alt_syntax
-    }
-
-    pub fn parse(input: &str) -> Option<(Self, &str)> {
-        if let Ok(pair) = MarkdownParser::parse(Rule::headings1, input) {
-            let header = pair.as_str();
-            let left = &input[header.len()..];
-            let space = header.find(' ').unwrap();
-            let level = header[0..space].len();
-            let text = &header[space..];
-            return Some((
-                Self {
-                    text: text.trim().to_owned(),
-                    level,
-                    alt_syntax: false,
-                },
-                left,
-            ));
-        }
-
-        match MarkdownParser::parse(Rule::headings2, input) {
-            Ok(pair) => {
-                let header = pair.as_str();
-                let left = &input[header.len()..];
-                jdebug!(header = header, func = "Header::parse()", line = line!());
-                let (text, mark) = header.trim().split_once('\n').unwrap();
-                // Start with '==' is level1
-                let mut level = 1;
-                if mark.starts_with("--") {
-                    level = 2;
-                };
-
-                Some((
-                    Self {
-                        text: text.trim().to_owned(),
-                        level,
-                        alt_syntax: true,
-                    },
-                    left,
-                ))
-            }
-            _ => {
-                jdebug!(input = input, func = "Header::parse()", line = line!());
-                None
-            }
-        }
-    }
-}
-
-pub struct Paragraph {
-    text: String,
-}
-
-impl Paragraph {
-    pub fn parse(input: &str) -> Option<(Self, &str)> {
-        match MarkdownParser::parse(Rule::paragraph, input) {
-            Ok(pair) => {
-                let matched = pair.as_str();
-                let index = matched.len();
-                Some((
-                    Self {
-                        text: matched.trim().to_owned(),
-                    },
-                    &input[index..],
-                ))
-            }
-            _ => None,
-        }
-    }
-
-    pub fn text(&self) -> &str {
-        &self.text
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use super::{Header, Paragraph};
+    use super::{header::Header, paragraph::Paragraph};
     use jlogger_tracing::{jdebug, JloggerBuilder, LevelFilter};
     use pest::Parser;
     use pest_derive::Parser;
@@ -160,126 +69,6 @@ mod tests {
         assert_eq!(header.text(), "An h1 header");
         assert_eq!(header.level(), 1);
         assert_eq!(header.is_alt_syntax(), true);
-    }
-
-    #[test]
-    fn header_test01() {
-        use super::Header;
-
-        let (header, left) = Header::parse("# abc\n").unwrap();
-        assert_eq!(header.level(), 1);
-        assert_eq!(header.text(), "abc");
-        assert_eq!(header.alt_syntax, false);
-        assert!(left.is_empty());
-
-        let (header, left) = Header::parse("## abc\n").unwrap();
-        assert_eq!(header.level(), 2);
-        assert_eq!(header.text(), "abc");
-        assert_eq!(header.alt_syntax, false);
-        assert!(left.is_empty());
-
-        let (header, left) = Header::parse("### abc\n").unwrap();
-        assert_eq!(header.level(), 3);
-        assert_eq!(header.text(), "abc");
-        assert_eq!(header.alt_syntax, false);
-        assert!(left.is_empty());
-
-        let (header, left) = Header::parse("#### abc\n").unwrap();
-        assert_eq!(header.level(), 4);
-        assert_eq!(header.text(), "abc");
-        assert_eq!(header.alt_syntax, false);
-        assert!(left.is_empty());
-
-        let (header, left) = Header::parse("##### abc\n").unwrap();
-        assert_eq!(header.level(), 5);
-        assert_eq!(header.text(), "abc");
-        assert_eq!(header.alt_syntax, false);
-        assert!(left.is_empty());
-
-        let (header, left) = Header::parse("###### abc\n").unwrap();
-        assert_eq!(header.level(), 6);
-        assert_eq!(header.text(), "abc");
-        assert_eq!(header.alt_syntax, false);
-        assert!(left.is_empty());
-    }
-
-    #[test]
-    fn header_test02() {
-        use super::Header;
-
-        let (header, left) = Header::parse("# abc\ndef").unwrap();
-        assert_eq!(header.level(), 1);
-        assert_eq!(header.text(), "abc");
-        assert_eq!(header.alt_syntax, false);
-        assert_eq!(left, "def");
-
-        let (header, left) = Header::parse("## abc\ndef").unwrap();
-        assert_eq!(header.level(), 2);
-        assert_eq!(header.text(), "abc");
-        assert_eq!(header.alt_syntax, false);
-        assert_eq!(left, "def");
-
-        let (header, left) = Header::parse("### abc\ndef").unwrap();
-        assert_eq!(header.level(), 3);
-        assert_eq!(header.text(), "abc");
-        assert_eq!(header.alt_syntax, false);
-        assert_eq!(left, "def");
-
-        let (header, left) = Header::parse("#### abc\ndef").unwrap();
-        assert_eq!(header.level(), 4);
-        assert_eq!(header.text(), "abc");
-        assert_eq!(header.alt_syntax, false);
-        assert_eq!(left, "def");
-
-        let (header, left) = Header::parse("##### abc\ndef").unwrap();
-        assert_eq!(header.level(), 5);
-        assert_eq!(header.text(), "abc");
-        assert_eq!(header.alt_syntax, false);
-        assert_eq!(left, "def");
-
-        let (header, left) = Header::parse("###### abc\ndef").unwrap();
-        assert_eq!(header.level(), 6);
-        assert_eq!(header.text(), "abc");
-        assert_eq!(header.alt_syntax, false);
-        assert_eq!(left, "def");
-    }
-
-    #[test]
-    fn header_test03() {
-        use super::Header;
-
-        let (header, left) = Header::parse("abc def\n==\n").unwrap();
-        assert_eq!(header.level(), 1);
-        assert_eq!(header.text(), "abc def");
-        assert_eq!(header.alt_syntax, true);
-        assert!(left.is_empty());
-
-        let (header, left) = Header::parse("abc def\n--\n").unwrap();
-        assert_eq!(header.level(), 2);
-        assert_eq!(header.text(), "abc def");
-        assert_eq!(header.alt_syntax, true);
-        assert!(left.is_empty());
-    }
-
-    #[test]
-    fn paragraph_test01() {
-        use super::Paragraph;
-
-        let (p, left) = Paragraph::parse("\nabc def\n").unwrap();
-        assert_eq!(p.text(), "abc def");
-        assert!(left.is_empty());
-
-        let (p, left) = Paragraph::parse("\nabc.def\n").unwrap();
-        assert_eq!(p.text(), "abc.def");
-        assert!(left.is_empty());
-
-        let (p, left) = Paragraph::parse("\na,;f.f\n").unwrap();
-        assert_eq!(p.text(), "a,;f.f");
-        assert!(left.is_empty());
-
-        let (p, left) = Paragraph::parse("\nabc def\nghi").unwrap();
-        assert_eq!(p.text(), "abc def");
-        assert_eq!(left, "ghi");
     }
 
     #[test]
