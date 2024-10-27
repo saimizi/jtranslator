@@ -1,8 +1,8 @@
 pub mod header;
 pub mod paragraph;
 
-use std::fmt::Display;
 use pest_derive::Parser;
+use std::fmt::Display;
 
 #[derive(Parser)]
 #[grammar = "../lib/md/markdown.pest"]
@@ -73,155 +73,79 @@ mod tests {
 
     #[test]
     fn word1() {
-        let test_str = "abc";
-        let pair = MarkdownParser::parse(Rule::words, test_str).unwrap();
-        assert_eq!(pair.as_str(), test_str);
+        let run_test = |test_str| {
+            let pair = MarkdownParser::parse(Rule::words, test_str).unwrap();
+            assert_eq!(pair.as_str(), test_str);
+        };
 
-        let test_str = "ABC";
-        let pair = MarkdownParser::parse(Rule::words, test_str).unwrap();
-        assert_eq!(pair.as_str(), test_str);
-
-        let test_str = "Abc";
-        let pair = MarkdownParser::parse(Rule::words, test_str).unwrap();
-        assert_eq!(pair.as_str(), test_str);
-
-        let test_str = "_abc";
-        let pair = MarkdownParser::parse(Rule::words, test_str).unwrap();
-        assert_eq!(pair.as_str(), test_str);
-    }
-
-    #[test]
-    fn words1() {
-        let test_str = "abc";
-        let pair = MarkdownParser::parse(Rule::words, test_str).unwrap();
-        assert_eq!(pair.as_str(), test_str);
-
-        let test_str = "abc def";
-        let pair = MarkdownParser::parse(Rule::words, test_str).unwrap();
-        assert_eq!(pair.as_str(), test_str);
+        run_test("abc");
+        run_test("ABC");
+        run_test("Abc");
+        run_test("abc def");
+        run_test("1 def");
+        run_test("1 2");
+        run_test("a1b 2bc");
+        run_test("_b b_");
     }
 
     #[test]
     fn words2() {
-        let test_str = "1 def";
-        let pair = MarkdownParser::parse(Rule::words, test_str).unwrap();
-        assert_eq!(pair.as_str(), test_str);
+        let run_test = |test_str| {
+            assert!(MarkdownParser::parse(Rule::words, test_str).is_err());
+        };
 
-        let test_str = "1 2";
-        let pair = MarkdownParser::parse(Rule::words, test_str).unwrap();
-        assert_eq!(pair.as_str(), test_str);
-
-        let test_str = "a1b 2bc";
-        let pair = MarkdownParser::parse(Rule::words, test_str).unwrap();
-        assert_eq!(pair.as_str(), test_str);
-    }
-
-    #[test]
-    fn words5() {
-        let test_str = "_b";
-        let pair = MarkdownParser::parse(Rule::words, test_str).unwrap();
-        assert_eq!(pair.as_str(), test_str);
-
-        let test_str = "_b b_";
-        let pair = MarkdownParser::parse(Rule::words, test_str).unwrap();
-        assert_eq!(pair.as_str(), test_str);
-    }
-
-    #[test]
-    fn words6() {
-        let test_str = "@";
-        let result = MarkdownParser::parse(Rule::words, test_str);
-
-        assert!(result.is_err());
-
-        let test_str = "#";
-        let result = MarkdownParser::parse(Rule::words, test_str);
-        assert!(result.is_err());
-
-        let test_str = "-";
-        let result = MarkdownParser::parse(Rule::words, test_str);
-        assert!(result.is_err());
+        run_test("@");
+        run_test("#");
+        run_test("-");
     }
 
     #[test]
     fn headings1_1() {
-        let test_str = "# abc\n";
-        jdebug!("{}", test_str);
-        let pair = MarkdownParser::parse(Rule::headings1, test_str).unwrap();
-        assert_eq!(pair.as_str(), test_str);
+        let run_test = |test_str| {
+            let pair = MarkdownParser::parse(Rule::headings1, test_str).unwrap();
+            assert_eq!(pair.as_str(), test_str);
+        };
 
-        let test_str = "# abc\ndef";
-        jdebug!("{}", test_str);
-        let pair = MarkdownParser::parse(Rule::headings1, test_str).unwrap();
-        assert_eq!(pair.as_str(), "# abc\n");
-
-        let test_str = "# Abc\n";
-        let pair = MarkdownParser::parse(Rule::headings1, test_str).unwrap();
-        assert_eq!(pair.as_str(), test_str);
-
-        let test_str = "# abc def\n";
-        let pair = MarkdownParser::parse(Rule::headings1, test_str).unwrap();
-        assert_eq!(pair.as_str(), test_str);
-    }
-
-    #[test]
-    fn headings1_2() {
-        let test_str = "# 123\n";
-        let pair = MarkdownParser::parse(Rule::headings1, test_str).unwrap();
-        assert_eq!(pair.as_str(), test_str);
-
-        let test_str = "# 123 456\n";
-        let pair = MarkdownParser::parse(Rule::headings1, test_str).unwrap();
-        assert_eq!(pair.as_str(), test_str);
+        run_test("# Hello\n");
+        run_test("# Hello, world!\n");
+        run_test("# Hello, world! how are you?\n");
+        run_test("# Hello, world! how are you? Great.\n");
+        run_test("# 1 Hello, world! how are you? Great.\n");
+        run_test("# 1 2 Hello, world! how are you? Great.\n");
     }
 
     #[test]
     fn headings2_1() {
-        let test_str = "abc\n==\n";
-        let pair = MarkdownParser::parse(Rule::headings2, test_str).unwrap();
-        assert_eq!(pair.as_str(), test_str);
+        let run_test = |test_str| {
+            let pair = MarkdownParser::parse(Rule::headings2, test_str).unwrap();
+            assert_eq!(pair.as_str(), test_str);
+        };
 
-        let test_str = "abc def\n==\n";
-        let pair = MarkdownParser::parse(Rule::headings2, test_str).unwrap();
-        assert_eq!(pair.as_str(), test_str);
-
-        let test_str = "abc\n--\n";
-        let pair = MarkdownParser::parse(Rule::headings2, test_str).unwrap();
-        assert_eq!(pair.as_str(), test_str);
-
-        let test_str = "abc\n====\n";
-        let pair = MarkdownParser::parse(Rule::headings2, test_str).unwrap();
-        assert_eq!(pair.as_str(), test_str);
-
-        let test_str = "abc\n----\n";
-        let pair = MarkdownParser::parse(Rule::headings2, test_str).unwrap();
-        assert_eq!(pair.as_str(), test_str);
+        run_test("Hello\n==\n");
+        run_test("Hello\n--\n");
+        run_test("Hello, world!\n==\n");
+        run_test("Hello, world!\n--\n");
+        run_test("Hello, world! how are you?\n==\n");
+        run_test("Hello, world! how are you?\n--\n");
+        run_test("Hello, world! how are you? Great.\n==\n");
+        run_test("Hello, world! how are you? Great.\n--\n");
+        run_test("1 Hello, world! how are you? Great.\n==\n");
+        run_test("1 Hello, world! how are you? Great.\n--\n");
+        run_test("1 2 Hello, world! how are you? Great.\n==\n");
+        run_test("1 2 Hello, world! how are you? Great.\n--\n");
+        run_test("1 2 Hello, world! how are you? Great.\n====\n");
+        run_test("1 2 Hello, world! how are you? Great.\n----\n");
     }
 
     #[test]
     fn headings2_2() {
-        let test_str = "abc\n===\n";
-        let pair = MarkdownParser::parse(Rule::headings2, test_str);
-        assert!(pair.is_err());
+        let run_test = |test_str| {
+            assert!(MarkdownParser::parse(Rule::headings2, test_str).is_err());
+        };
 
-        let test_str = "abc\n---\n";
-        let pair = MarkdownParser::parse(Rule::headings2, test_str);
-        assert!(pair.is_err());
-
-        let test_str = "abc\n==--\n";
-        let pair = MarkdownParser::parse(Rule::headings2, test_str);
-        assert!(pair.is_err());
-
-        let test_str = "abc\n--==\n";
-        let pair = MarkdownParser::parse(Rule::headings2, test_str);
-        assert!(pair.is_err());
-
-        let test_str = "a\nabc\n===\n";
-        let pair = MarkdownParser::parse(Rule::headings2, test_str);
-        assert!(pair.is_err());
-
-        let test_str = "a\nabc\n---\n";
-        let pair = MarkdownParser::parse(Rule::headings2, test_str);
-        assert!(pair.is_err());
+        run_test("1 2 Hello, world! how are you? Great.\n===\n");
+        run_test("1 2 Hello, world! how are you? Great.\n---\n");
+        run_test("1 2 Hello, world! how are you? Great.\n==--\n");
+        run_test("1 2 Hello, world! how are you? Great.\n--==\n");
     }
 }

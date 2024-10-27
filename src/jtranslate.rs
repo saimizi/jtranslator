@@ -25,8 +25,7 @@ struct Cli {
     verbose: u8,
 }
 
-#[tokio::main]
-async fn main() {
+fn main() {
     let cli = Cli::parse();
     let max_level = match cli.verbose {
         0 => LevelFilter::INFO,
@@ -53,7 +52,7 @@ async fn main() {
 
     if !text.is_empty() {
         let outputs = cli.to.split(',').collect();
-        match async_translate_text(&text, &cli.from, outputs).await {
+        match translate_text(&text, &cli.from, outputs) {
             Ok(translated) => {
                 for entry in translated.iter() {
                     jinfo!(Language = entry.language());

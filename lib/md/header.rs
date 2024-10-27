@@ -1,4 +1,7 @@
 use super::{MarkdownParser, Rule};
+use crate::error::JTranslateError;
+use crate::translate_text;
+use error_stack::Result;
 use jlogger_tracing::jdebug;
 use pest::Parser;
 
@@ -19,6 +22,35 @@ impl Header {
 
     pub fn is_alt_syntax(&self) -> bool {
         self.alt_syntax
+    }
+
+    pub fn markdown(&self, translate: Option<(&str, &str)>) -> Result<String, JTranslateError> {
+        let mut result = String::new();
+
+        if !self.alt_syntax {
+            result = (0..self.level).map(|_| '#').collect::<String>();
+            result.push(' ');
+        }
+
+        if let Some((from, to)) = translate {
+            let text = translate_text(&self.text, from, vec![to])?;
+            result.push_str(text[0].text());
+        } else {
+            result.push_str(&self.text);
+        }
+
+        if self.alt_syntax {
+            result.push('\n');
+            if self.level == 1 {
+                result.push_str("==");
+            } else {
+                result.push_str("--");
+            }
+        }
+
+        result.push('\n');
+
+        Ok(result)
     }
 
     pub fn parse(input: &str) -> Option<(Self, &str)> {

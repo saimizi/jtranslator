@@ -6,8 +6,15 @@ use error::JTranslateError;
 use error_stack::{Report, Result};
 use jlogger_tracing::jdebug;
 use key_info::key_info;
+use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use std::sync::Mutex;
+use tokio::runtime::Runtime;
+
+lazy_static! {
+    static ref RUNTIME: Mutex<Runtime> = Mutex::new(Runtime::new().unwrap());
+}
 
 #[derive(Serialize, Deserialize)]
 pub struct TranslationEntry {
@@ -37,7 +44,7 @@ struct Translation {
     translations: Vec<TranslationEntry>,
 }
 
-pub async fn translate_text(
+pub async fn async_translate_text(
     text: &str,
     from: &str,
     to: Vec<&str>,
@@ -128,4 +135,15 @@ pub async fn translate_text(
     }
 
     Err(Report::new(JTranslateError::InvalidData))
+}
+
+pub fn translate_text(
+    text: &str,
+    from: &str,
+    to: Vec<&str>,
+) -> Result<Vec<TranslationEntry>, JTranslateError> {
+    RUNTIME
+        .lock()
+        .unwrap()
+        .block_on(async_translate_text(text, from, to))
 }
