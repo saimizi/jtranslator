@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
-use jlogger_tracing::{jdebug, jinfo, JloggerBuilder};
-use pest::{Parser, Token};
+use jlogger_tracing::jdebug;
+use pest::Parser;
 use pest_derive::Parser;
 
 #[derive(Parser)]
@@ -43,23 +43,20 @@ impl Header {
     }
 
     pub fn parse(input: &str) -> Option<(Self, &str)> {
-        match MarkdownParser::parse(Rule::headings1, input) {
-            Ok(pair) => {
-                let header = pair.as_str();
-                let left = &input[header.len()..];
-                let space = header.find(' ').unwrap();
-                let level = header[0..space].len();
-                let text = &header[space..];
-                return Some((
-                    Self {
-                        text: text.trim().to_owned(),
-                        level,
-                        alt_syntax: false,
-                    },
-                    left,
-                ));
-            }
-            _ => {}
+        if let Ok(pair) = MarkdownParser::parse(Rule::headings1, input) {
+            let header = pair.as_str();
+            let left = &input[header.len()..];
+            let space = header.find(' ').unwrap();
+            let level = header[0..space].len();
+            let text = &header[space..];
+            return Some((
+                Self {
+                    text: text.trim().to_owned(),
+                    level,
+                    alt_syntax: false,
+                },
+                left,
+            ));
         }
 
         match MarkdownParser::parse(Rule::headings2, input) {
@@ -117,34 +114,11 @@ impl Paragraph {
     }
 }
 
-//fn main() {
-//    JloggerBuilder::new()
-//        .max_level(jlogger_tracing::LevelFilter::TRACE)
-//        .build();
-//
-//    let markdown = include_str!("../test/markdown-sample.md");
-//    let (header, left) = Header::parse(&markdown).unwrap();
-//    jinfo!(
-//        header = header.text(),
-//        level = header.level(),
-//        alt_syntax = header.is_alt_syntax()
-//    );
-//
-//    let (p, left) = Paragraph::parse(&left).unwrap();
-//    jinfo!(paragraph = p.text(),);
-//
-//    let (header, _left) = Header::parse(&left).unwrap();
-//    jinfo!(
-//        header = header.text(),
-//        level = header.level(),
-//        alt_syntax = header.is_alt_syntax()
-//    );
-//}
-
 #[cfg(test)]
 mod tests {
+    use super::{Header, Paragraph};
     use jlogger_tracing::{jdebug, JloggerBuilder, LevelFilter};
-    use pest::{Parser, Token};
+    use pest::Parser;
     use pest_derive::Parser;
 
     #[derive(Parser)]
@@ -158,6 +132,34 @@ mod tests {
             .max_level(LevelFilter::DEBUG)
             .log_console(false)
             .build();
+    }
+
+    #[test]
+    fn file_parse_test01() {
+        let markdown = include_str!("../../test/markdown-sample.md");
+        let (header, left) = Header::parse(&markdown).unwrap();
+        jdebug!(
+            header = header.text(),
+            level = header.level(),
+            alt_syntax = header.is_alt_syntax()
+        );
+        assert_eq!(header.text(), "An h1 header");
+        assert_eq!(header.level(), 1);
+        assert_eq!(header.is_alt_syntax(), false);
+
+        let (p, left) = Paragraph::parse(&left).unwrap();
+        jdebug!(paragraph = p.text(),);
+        assert_eq!(p.text(), "This is the main style.");
+
+        let (header, _left) = Header::parse(&left).unwrap();
+        jdebug!(
+            header = header.text(),
+            level = header.level(),
+            alt_syntax = header.is_alt_syntax()
+        );
+        assert_eq!(header.text(), "An h1 header");
+        assert_eq!(header.level(), 1);
+        assert_eq!(header.is_alt_syntax(), true);
     }
 
     #[test]
