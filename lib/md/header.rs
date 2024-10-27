@@ -42,7 +42,6 @@ impl Header {
             Ok(pair) => {
                 let header = pair.as_str();
                 let left = &input[header.len()..];
-                jdebug!(header = header, func = "Header::parse()", line = line!());
                 let (text, mark) = header.trim().split_once('\n').unwrap();
                 // Start with '==' is level1
                 let mut level = 1;
@@ -73,96 +72,79 @@ mod tests {
 
     #[test]
     fn header_test01() {
-        let (header, left) = Header::parse("# abc\n").unwrap();
-        assert_eq!(header.level(), 1);
-        assert_eq!(header.text(), "abc");
-        assert_eq!(header.alt_syntax, false);
-        assert!(left.is_empty());
+        let run_test = |level: usize| {
+            let mut test_str: String = (0..level).map(|_| '#').collect();
+            test_str.push(' ');
+            let text = "Hello, world! how are you? Great.";
+            test_str.push_str(text);
+            test_str.push('\n');
 
-        let (header, left) = Header::parse("## abc\n").unwrap();
-        assert_eq!(header.level(), 2);
-        assert_eq!(header.text(), "abc");
-        assert_eq!(header.alt_syntax, false);
-        assert!(left.is_empty());
+            let (header, left) = Header::parse(&test_str).unwrap();
+            assert_eq!(header.level(), level);
+            assert_eq!(header.text(), text);
+            assert_eq!(header.alt_syntax, false);
+            assert!(left.is_empty());
+            assert_eq!(header.markdown(None).unwrap(), test_str);
+        };
 
-        let (header, left) = Header::parse("### abc\n").unwrap();
-        assert_eq!(header.level(), 3);
-        assert_eq!(header.text(), "abc");
-        assert_eq!(header.alt_syntax, false);
-        assert!(left.is_empty());
-
-        let (header, left) = Header::parse("#### abc\n").unwrap();
-        assert_eq!(header.level(), 4);
-        assert_eq!(header.text(), "abc");
-        assert_eq!(header.alt_syntax, false);
-        assert!(left.is_empty());
-
-        let (header, left) = Header::parse("##### abc\n").unwrap();
-        assert_eq!(header.level(), 5);
-        assert_eq!(header.text(), "abc");
-        assert_eq!(header.alt_syntax, false);
-        assert!(left.is_empty());
-
-        let (header, left) = Header::parse("###### abc\n").unwrap();
-        assert_eq!(header.level(), 6);
-        assert_eq!(header.text(), "abc");
-        assert_eq!(header.alt_syntax, false);
-        assert!(left.is_empty());
+        run_test(1);
+        run_test(2);
+        run_test(3);
+        run_test(4);
+        run_test(5);
+        run_test(6);
     }
 
     #[test]
     fn header_test02() {
-        let (header, left) = Header::parse("# abc\ndef").unwrap();
-        assert_eq!(header.level(), 1);
-        assert_eq!(header.text(), "abc");
-        assert_eq!(header.alt_syntax, false);
-        assert_eq!(left, "def");
+        let run_test = |level: usize| {
+            let mut test_str: String = (0..level).map(|_| '#').collect();
+            test_str.push(' ');
+            let text = "Hello, world! how are you? Great.";
+            test_str.push_str(text);
+            test_str.push('\n');
+            let extra = "DUMMY";
+            test_str.push_str(extra);
 
-        let (header, left) = Header::parse("## abc\ndef").unwrap();
-        assert_eq!(header.level(), 2);
-        assert_eq!(header.text(), "abc");
-        assert_eq!(header.alt_syntax, false);
-        assert_eq!(left, "def");
+            let (header, left) = Header::parse(&test_str).unwrap();
+            assert_eq!(header.level(), level);
+            assert_eq!(header.text(), text);
+            assert_eq!(header.alt_syntax, false);
+            assert_eq!(left, extra);
+            assert_eq!(
+                header.markdown(None).unwrap(),
+                test_str.trim_end_matches(extra)
+            );
+        };
 
-        let (header, left) = Header::parse("### abc\ndef").unwrap();
-        assert_eq!(header.level(), 3);
-        assert_eq!(header.text(), "abc");
-        assert_eq!(header.alt_syntax, false);
-        assert_eq!(left, "def");
-
-        let (header, left) = Header::parse("#### abc\ndef").unwrap();
-        assert_eq!(header.level(), 4);
-        assert_eq!(header.text(), "abc");
-        assert_eq!(header.alt_syntax, false);
-        assert_eq!(left, "def");
-
-        let (header, left) = Header::parse("##### abc\ndef").unwrap();
-        assert_eq!(header.level(), 5);
-        assert_eq!(header.text(), "abc");
-        assert_eq!(header.alt_syntax, false);
-        assert_eq!(left, "def");
-
-        let (header, left) = Header::parse("###### abc\ndef").unwrap();
-        assert_eq!(header.level(), 6);
-        assert_eq!(header.text(), "abc");
-        assert_eq!(header.alt_syntax, false);
-        assert_eq!(left, "def");
+        run_test(1);
+        run_test(2);
+        run_test(3);
+        run_test(4);
+        run_test(5);
+        run_test(6);
     }
 
     #[test]
     fn header_test03() {
-        use super::Header;
+        let text = "Hello, world! how are you? Great.";
+        let mut test_str = text.to_owned();
+        test_str.push_str("\n==\n");
 
-        let (header, left) = Header::parse("abc def\n==\n").unwrap();
+        let (header, left) = Header::parse(&test_str).unwrap();
         assert_eq!(header.level(), 1);
-        assert_eq!(header.text(), "abc def");
+        assert_eq!(header.text(), text);
         assert_eq!(header.alt_syntax, true);
         assert!(left.is_empty());
+        assert_eq!(header.markdown(None).unwrap(), format!("{}\n==\n", text));
 
-        let (header, left) = Header::parse("abc def\n--\n").unwrap();
+        let mut test_str = text.to_owned();
+        test_str.push_str("\n--\n");
+        let (header, left) = Header::parse(&test_str).unwrap();
         assert_eq!(header.level(), 2);
-        assert_eq!(header.text(), "abc def");
+        assert_eq!(header.text(), text);
         assert_eq!(header.alt_syntax, true);
         assert!(left.is_empty());
+        assert_eq!(header.markdown(None).unwrap(), format!("{}\n--\n", text));
     }
 }

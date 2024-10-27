@@ -1,10 +1,11 @@
 WHITESPACE = { (" " | "\t")}
 MARK = {(NONSPACING_MARK | SPACING_MARK | ENCLOSING_MARK | PUNCTUATION)} 
 MARKS = {MARK+} 
+HEADER_MARKS = { ("?" | "!" | "." | ",") }
 word ={ (ASCII_ALPHANUMERIC | "_")+ }
 words = { word ~ (WHITESPACE+ ~ word)* }
-headings1 = {("# " | "## " | "### " | "#### " | "##### " | "###### ") ~ words ~ NEWLINE}
-headings2 = {NEWLINE* ~ words ~ NEWLINE ~ ("=="+ | "--"+) ~ NEWLINE}
+headings1 = {("# " | "## " | "### " | "#### " | "##### " | "###### ") ~ (words | HEADER_MARKS)+ ~ NEWLINE}
+headings2 = {NEWLINE* ~ (words | HEADER_MARKS)+ ~ NEWLINE ~ ("=="+ | "--"+) ~ NEWLINE}
 headings = { (headings1 | headings2)}
 paragraph = {NEWLINE* ~ (words | MARKS )+ ~ NEWLINE}
 

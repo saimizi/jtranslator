@@ -53,7 +53,7 @@ async fn main() {
 
     if !text.is_empty() {
         let outputs = cli.to.split(',').collect();
-        match translate_text(&text, &cli.from, outputs).await {
+        match async_translate_text(&text, &cli.from, outputs).await {
             Ok(translated) => {
                 for entry in translated.iter() {
                     jinfo!(Language = entry.language());
