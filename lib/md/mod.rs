@@ -1,4 +1,5 @@
 pub mod header;
+pub mod italic;
 pub mod paragraph;
 
 use pest_derive::Parser;
@@ -74,10 +75,12 @@ mod tests {
         jdebug!(paragraph = p.text(),);
         assert_eq!(p.text(), "Paragraphs are separated by a blank line.");
 
-        let (p, left) = Paragraph::parse(&left).unwrap();
+        let (p, _left) = Paragraph::parse(&left).unwrap();
         jdebug!(paragraph = p.text(),);
-        assert_eq!(p.text(), "2nd paragraph. *Italic*, **bold**, and `monospace`. Itemized lists\nlook like:");
-
+        assert_eq!(
+            p.text(),
+            "2nd paragraph. *Italic*, **bold**, and `monospace`. Itemized lists\nlook like:"
+        );
     }
 
     #[test]
@@ -90,11 +93,11 @@ mod tests {
         run_test("abc");
         run_test("ABC");
         run_test("Abc");
-        run_test("abc def");
+        run_test("abcdef");
         run_test("1 def");
         run_test("1 2");
         run_test("a1b 2bc");
-        run_test("_b b_");
+        run_test("b b");
     }
 
     #[test]
@@ -111,7 +114,7 @@ mod tests {
     #[test]
     fn header_marks_1() {
         let run_test = |test_str| {
-            let pair = MarkdownParser::parse(Rule::HEADER_MARKS, test_str).unwrap();
+            let pair = MarkdownParser::parse(Rule::MARK, test_str).unwrap();
             assert_eq!(pair.as_str(), test_str);
         };
 
@@ -136,16 +139,16 @@ mod tests {
     #[test]
     fn headings1_1() {
         let run_test = |test_str| {
-            jdebug!(test_str=test_str);
+            jdebug!(test_str = test_str);
             let pair = MarkdownParser::parse(Rule::headings1, test_str).unwrap();
             assert_eq!(pair.as_str(), test_str);
         };
 
-        jdebug!(line=line!());
+        jdebug!(line = line!());
         run_test("# Hello\n");
-        jdebug!(line=line!());
+        jdebug!(line = line!());
         run_test("# Hello, world!\n");
-        jdebug!(line=line!());
+        jdebug!(line = line!());
         run_test("# Hello, world! how are you?\n");
         run_test("# Hello, world! how are you? Great.\n");
         run_test("# 1 Hello, world! how are you? Great.\n");
