@@ -1,4 +1,5 @@
 use super::{MarkdownParser, Rule};
+use jlogger_tracing::jdebug;
 use pest::Parser;
 
 pub struct Paragraph {
@@ -7,6 +8,7 @@ pub struct Paragraph {
 
 impl Paragraph {
     pub fn parse(input: &str) -> Option<(Self, &str)> {
+        jdebug!(input = input, func = "Paragraph::parse()", line = line!());
         match MarkdownParser::parse(Rule::paragraph, input) {
             Ok(pair) => {
                 let matched = pair.as_str();
@@ -33,20 +35,24 @@ mod tests {
 
     #[test]
     fn paragraph_test01() {
-        let (p, left) = Paragraph::parse("\nabc def\n").unwrap();
-        assert_eq!(p.text(), "abc def");
-        assert!(left.is_empty());
+        let run_test = |test_str: &str| {
+            let (p, left) = Paragraph::parse(test_str).unwrap();
+            let end = test_str.find("\n\n").unwrap();
+            let text = test_str[..end].trim();
+            let expected_left = &test_str[end + 2..];
 
-        let (p, left) = Paragraph::parse("\nabc.def\n").unwrap();
-        assert_eq!(p.text(), "abc.def");
-        assert!(left.is_empty());
+            assert_eq!(p.text(), text);
+            if expected_left.is_empty() {
+                assert!(left.is_empty());
+            } else {
+                assert_eq!(left, expected_left);
+            }
+        };
 
-        let (p, left) = Paragraph::parse("\na,;f.f\n").unwrap();
-        assert_eq!(p.text(), "a,;f.f");
-        assert!(left.is_empty());
-
-        let (p, left) = Paragraph::parse("\nabc def\nghi").unwrap();
-        assert_eq!(p.text(), "abc def");
-        assert_eq!(left, "ghi");
+        run_test("\nabc def\n\n");
+        run_test("\nabc.def\n\n");
+        run_test("\na,;f.f\n\n");
+        run_test("\nabc def\n\nghi");
+        run_test("2nd paragraph. *Italic*, **bold**, and `monospace`. Itemized lists\nlook like:\n\n"); 
     }
 }

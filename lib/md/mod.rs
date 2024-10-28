@@ -60,7 +60,7 @@ mod tests {
         jdebug!(paragraph = p.text(),);
         assert_eq!(p.text(), "This is the main style.");
 
-        let (header, _left) = Header::parse(&left).unwrap();
+        let (header, left) = Header::parse(&left).unwrap();
         jdebug!(
             header = header.text(),
             level = header.level(),
@@ -69,6 +69,15 @@ mod tests {
         assert_eq!(header.text(), "An h1 header");
         assert_eq!(header.level(), 1);
         assert_eq!(header.is_alt_syntax(), true);
+
+        let (p, left) = Paragraph::parse(&left).unwrap();
+        jdebug!(paragraph = p.text(),);
+        assert_eq!(p.text(), "Paragraphs are separated by a blank line.");
+
+        let (p, left) = Paragraph::parse(&left).unwrap();
+        jdebug!(paragraph = p.text(),);
+        assert_eq!(p.text(), "2nd paragraph. *Italic*, **bold**, and `monospace`. Itemized lists\nlook like:");
+
     }
 
     #[test]
