@@ -1,5 +1,6 @@
 pub mod header;
 pub mod italic;
+pub mod bold;
 pub mod paragraph;
 
 use pest_derive::Parser;

@@ -8,5 +8,8 @@ headings = { (headings1 | headings2)}
 italic1 = {"*" ~ (words | (!"*" ~ MARK))+ ~ "*"}
 italic2 = {"_" ~ (words | (!"_" ~ MARK))+ ~ "_"}
 italic = { (italic1 | italic2) }
+bold1 = {"**" ~ (words | (!"**" ~ MARK))+ ~ "**"}
+bold2 = {"__" ~ (words | (!"__" ~ MARK))+ ~ "__"}
+bold = { (bold1 | bold2) }
 paragraph = {NEWLINE* ~ (words | MARK | (NEWLINE ~ !NEWLINE))+ ~ NEWLINE ~ NEWLINE}
 
