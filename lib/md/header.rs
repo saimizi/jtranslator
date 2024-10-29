@@ -103,7 +103,7 @@ mod tests {
     use super::Header;
 
     #[test]
-    fn header_test01() {
+    fn header_1() {
         let run_test = |level: usize| {
             let mut test_str: String = (0..level).map(|_| '#').collect();
             test_str.push(' ');
@@ -128,7 +128,7 @@ mod tests {
     }
 
     #[test]
-    fn header_test02() {
+    fn header_2() {
         let run_test = |level: usize| {
             let mut test_str: String = (0..level).map(|_| '#').collect();
             test_str.push(' ');
@@ -158,7 +158,7 @@ mod tests {
     }
 
     #[test]
-    fn header_test03() {
+    fn header_3() {
         let text = "Hello, world! how are you? Great.";
         let mut test_str = text.to_owned();
         test_str.push_str("\n==\n");

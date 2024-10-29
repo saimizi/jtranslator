@@ -34,7 +34,7 @@ mod tests {
     use super::Paragraph;
 
     #[test]
-    fn paragraph_test01() {
+    fn paragraph_1() {
         let run_test = |test_str: &str| {
             let (p, left) = Paragraph::parse(test_str).unwrap();
             let end = test_str.find("\n\n").unwrap();

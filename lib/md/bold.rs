@@ -49,7 +49,7 @@ mod tests {
     use jlogger_tracing::jdebug;
 
     #[test]
-    fn bold_test01() {
+    fn bold_1() {
         let run_test = |test_str: &str| {
             let (p, left) = Bold::parse(test_str).unwrap();
             let end = if test_str.starts_with("**") {
@@ -81,7 +81,7 @@ mod tests {
     }
 
     #[test]
-    fn bold_test02() {
+    fn bold_2() {
         assert!(Bold::parse("____").is_none());
         assert!(Bold::parse("****").is_none());
         assert!(Bold::parse("____a_").is_none());

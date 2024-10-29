@@ -48,7 +48,7 @@ mod tests {
     use jlogger_tracing::jdebug;
 
     #[test]
-    fn italic_test01() {
+    fn italic_1() {
         let run_test = |test_str: &str| {
             let (p, left) = Italic::parse(test_str).unwrap();
             let end = if test_str.starts_with("*") {
@@ -79,7 +79,7 @@ mod tests {
     }
 
     #[test]
-    fn italic_test02() {
+    fn italic_2() {
         assert!(Italic::parse("__").is_none());
         assert!(Italic::parse("**").is_none());
         assert!(Italic::parse("__a_").is_none());

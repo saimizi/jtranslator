@@ -46,7 +46,7 @@ mod tests {
     }
 
     #[test]
-    fn file_parse_test01() {
+    fn file_parse_1() {
         let markdown = include_str!("../../test/markdown-sample.md");
         let (header, left) = Header::parse(&markdown).unwrap();
         jdebug!(
@@ -85,7 +85,7 @@ mod tests {
     }
 
     #[test]
-    fn word1() {
+    fn words_1() {
         let run_test = |test_str| {
             let pair = MarkdownParser::parse(Rule::words, test_str).unwrap();
             assert_eq!(pair.as_str(), test_str);
@@ -102,7 +102,7 @@ mod tests {
     }
 
     #[test]
-    fn words2() {
+    fn words_2() {
         let run_test = |test_str| {
             assert!(MarkdownParser::parse(Rule::words, test_str).is_err());
         };
