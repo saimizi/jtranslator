@@ -1,6 +1,6 @@
+pub mod bold;
 pub mod header;
 pub mod italic;
-pub mod bold;
 pub mod paragraph;
 
 use pest_derive::Parser;
@@ -190,5 +190,34 @@ mod tests {
         run_test("1 2 Hello, world! how are you? Great.\n---\n");
         run_test("1 2 Hello, world! how are you? Great.\n==--\n");
         run_test("1 2 Hello, world! how are you? Great.\n--==\n");
+    }
+
+    #[test]
+    fn normal_1() {
+        let run_test = |test_str: &str, left: &str| {
+            let pair = MarkdownParser::parse(Rule::normal, test_str).unwrap();
+            assert_eq!(pair.as_str(), test_str.trim_end_matches(left));
+        };
+
+        run_test("abc", "");
+        run_test("1 2 Hello, world! how are you? Great", "");
+        run_test("1 2 Hello, world! how are you? Great", "");
+        run_test("1@2#Hello, \"world! 'how are you? Great", "");
+        run_test("_1@2#Hello, \"world! 'how are you? Great", "");
+        run_test("abc\n", "\n");
+        run_test(" abc\n", "\n");
+        run_test("**abc", "");
+        run_test("**abc*", "");
+        run_test("__abc", "");
+        run_test("__abc_", "");
+    }
+
+    #[test]
+    fn normal_2() {
+        let run_test = |test_str| assert!(MarkdownParser::parse(Rule::normal, test_str).is_err());
+
+        run_test("\nabc");
+        run_test("**abc**");
+        run_test("__abc__");
     }
 }

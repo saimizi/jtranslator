@@ -1,4 +1,4 @@
-WHITESPACE = { (" " | "\t")}
+WHITESPACE = _{(" " | "\t")}
 MARK = { !ASCII_ALPHANUMERIC ~ !NEWLINE ~ ASCII }
 word ={ ASCII_ALPHANUMERIC+ }
 words = { word ~ (WHITESPACE+ ~ word)* }
@@ -8,8 +8,12 @@ headings = { (headings1 | headings2)}
 italic1 = {"*" ~ (words | (!"*" ~ MARK))+ ~ "*"}
 italic2 = {"_" ~ (words | (!"_" ~ MARK))+ ~ "_"}
 italic = { (italic1 | italic2) }
-bold1 = {"**" ~ (words | (!"**" ~ MARK))+ ~ "**"}
-bold2 = {"__" ~ (words | (!"__" ~ MARK))+ ~ "__"}
+bold1 = {"*"{2} ~ (words | (!"*"{2} ~ MARK))+ ~ "*"{2}}
+bold2 = {"_"{2} ~ (words | (!"_"{2} ~ MARK))+ ~ "_"{2}}
 bold = { (bold1 | bold2) }
-paragraph = {NEWLINE* ~ (words | MARK | (NEWLINE ~ !NEWLINE))+ ~ NEWLINE ~ NEWLINE}
+singlebreak={NEWLINE{1}}
+linebreak=@{(" "{2} ~ NEWLINE | "<br>")}
+normal = { !(bold | italic) ~ (words | MARK)+}
+emptyline = {NEWLINE{2}}
+paragraph = {((singlebreak | linebreak){0,1} ~ normal | bold | italic)+ ~ emptyline}
 
