@@ -16,4 +16,8 @@ linebreak=@{(" "{2} ~ NEWLINE | "<br>")}
 normal = { !(bold | italic) ~ (words | MARK)+}
 emptyline = {NEWLINE{2}}
 paragraph = {((singlebreak | linebreak){0,1} ~ normal | bold | italic)+ ~ emptyline}
+non_number_item = {WHITESPACE* ~ ("* " | "- " | "+ ") ~  (words | MARK)+ ~ NEWLINE}
+number_item = {WHITESPACE* ~ ASCII_NONZERO_DIGIT ~ ASCII_DIGIT* ~ " " ~ (words | MARK)+ ~ NEWLINE}
+itemlist = {non_number_item+}
+list = {itemlist}
 
