@@ -220,4 +220,41 @@ mod tests {
         run_test("**abc**");
         run_test("__abc__");
     }
+
+    #[test]
+    fn non_number_item_1() {
+        let run_test = |test_str: &str, left: &str| {
+            let pair = MarkdownParser::parse(Rule::non_number_item, test_str).unwrap();
+            assert_eq!(pair.as_str(), test_str.trim_end_matches(left));
+        };
+
+        run_test("* item\n", "");
+        run_test("   * item\n", "");
+        run_test(" * item, hello world!\n", "");
+        run_test(" * item, hello world! **abc**\n", "");
+        run_test(" * item, hello world! __abc__\n", "");
+        run_test("* abc*\n", "");
+        run_test("* abc\nabc", "abc");
+
+        run_test("- item\n", "");
+        run_test("   - item\n", "");
+        run_test(" - item, hello world!\n", "");
+        run_test(" - item, hello world! __abc__\n", "");
+        run_test("- abc-\n", "");
+        run_test("- abc\nabc", "abc");
+    }
+
+    #[test]
+    fn non_number_item_2() {
+        let run_test = |test_str: &str| {
+            assert!(MarkdownParser::parse(Rule::non_number_item, test_str).is_err());
+        };
+
+        run_test("*item\n");
+        run_test("** item\n");
+        run_test("* item");
+        run_test("_item\n");
+        run_test("__ item\n");
+        run_test("_ item");
+    }
 }
