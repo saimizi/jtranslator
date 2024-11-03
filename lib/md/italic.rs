@@ -1,4 +1,4 @@
-use super::{MarkdownParser, Rule};
+use super::{MarkdownParser, MdOperation, Rule};
 use jlogger_tracing::jdebug;
 use pest::Parser;
 
@@ -35,8 +35,10 @@ impl Italic {
             }
         }
     }
+}
 
-    pub fn text(&self) -> &str {
+impl MdOperation for Italic {
+    fn text(&self) -> &str {
         self.text.trim_matches('*')
     }
 }
@@ -44,6 +46,7 @@ impl Italic {
 #[cfg(test)]
 mod tests {
     use super::Italic;
+    use super::MdOperation;
     #[allow(unused)]
     use jlogger_tracing::jdebug;
 

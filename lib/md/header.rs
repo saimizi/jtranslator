@@ -1,4 +1,4 @@
-use super::{MarkdownParser, Rule};
+use super::{MarkdownParser, MdOperation, Rule};
 use crate::error::JTranslateError;
 use crate::translate_text;
 use error_stack::Result;
@@ -16,41 +16,8 @@ impl Header {
         self.level
     }
 
-    pub fn text(&self) -> &str {
-        &self.text
-    }
-
     pub fn is_alt_syntax(&self) -> bool {
         self.alt_syntax
-    }
-
-    pub fn markdown(&self, translate: Option<(&str, &str)>) -> Result<String, JTranslateError> {
-        let mut result = String::new();
-
-        if !self.alt_syntax {
-            result = (0..self.level).map(|_| '#').collect::<String>();
-            result.push(' ');
-        }
-
-        if let Some((from, to)) = translate {
-            let text = translate_text(&self.text, from, vec![to])?;
-            result.push_str(text[0].text());
-        } else {
-            result.push_str(&self.text);
-        }
-
-        if self.alt_syntax {
-            result.push('\n');
-            if self.level == 1 {
-                result.push_str("==");
-            } else {
-                result.push_str("--");
-            }
-        }
-
-        result.push('\n');
-
-        Ok(result)
     }
 
     pub fn parse(input: &str) -> Option<(Self, &str)> {
@@ -98,9 +65,45 @@ impl Header {
     }
 }
 
+impl MdOperation for Header {
+    fn text(&self) -> &str {
+        &self.text
+    }
+
+    fn to_md_str(&self, translate: Option<(&str, &str)>) -> Result<String, JTranslateError> {
+        let mut result = String::new();
+
+        if !self.alt_syntax {
+            result = (0..self.level).map(|_| '#').collect::<String>();
+            result.push(' ');
+        }
+
+        if let Some((from, to)) = translate {
+            let text = translate_text(&self.text, from, vec![to])?;
+            result.push_str(text[0].text());
+        } else {
+            result.push_str(&self.text);
+        }
+
+        if self.alt_syntax {
+            result.push('\n');
+            if self.level == 1 {
+                result.push_str("==");
+            } else {
+                result.push_str("--");
+            }
+        }
+
+        result.push('\n');
+
+        Ok(result)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::Header;
+    use super::MdOperation;
 
     #[test]
     fn header_1() {
@@ -116,7 +119,7 @@ mod tests {
             assert_eq!(header.text(), text);
             assert_eq!(header.alt_syntax, false);
             assert!(left.is_empty());
-            assert_eq!(header.markdown(None).unwrap(), test_str);
+            assert_eq!(header.to_md_str(None).unwrap(), test_str);
         };
 
         run_test(1);
@@ -144,7 +147,7 @@ mod tests {
             assert_eq!(header.alt_syntax, false);
             assert_eq!(left, extra);
             assert_eq!(
-                header.markdown(None).unwrap(),
+                header.to_md_str(None).unwrap(),
                 test_str.trim_end_matches(extra)
             );
         };
@@ -168,7 +171,7 @@ mod tests {
         assert_eq!(header.text(), text);
         assert_eq!(header.alt_syntax, true);
         assert!(left.is_empty());
-        assert_eq!(header.markdown(None).unwrap(), format!("{}\n==\n", text));
+        assert_eq!(header.to_md_str(None).unwrap(), format!("{}\n==\n", text));
 
         let mut test_str = text.to_owned();
         test_str.push_str("\n--\n");
@@ -177,6 +180,6 @@ mod tests {
         assert_eq!(header.text(), text);
         assert_eq!(header.alt_syntax, true);
         assert!(left.is_empty());
-        assert_eq!(header.markdown(None).unwrap(), format!("{}\n--\n", text));
+        assert_eq!(header.to_md_str(None).unwrap(), format!("{}\n--\n", text));
     }
 }

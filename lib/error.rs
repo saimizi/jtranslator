@@ -18,6 +18,7 @@ pub enum JTranslateError {
     InvalidKey,
     IOError,
     UnExpected,
+    UnImplemented,
 }
 
 impl Display for JTranslateError {
@@ -27,6 +28,7 @@ impl Display for JTranslateError {
             JTranslateError::InvalidKey => "Invalid API key",
             JTranslateError::IOError => "IO error",
             JTranslateError::UnExpected => "Unexpected error",
+            JTranslateError::UnImplemented => "UnImplemented",
         };
 
         write!(f, "{msg}")

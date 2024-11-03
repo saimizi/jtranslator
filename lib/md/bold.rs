@@ -1,4 +1,4 @@
-use super::{MarkdownParser, Rule};
+use super::{MarkdownParser, MdOperation, Rule};
 use jlogger_tracing::jdebug;
 use pest::Parser;
 
@@ -36,8 +36,10 @@ impl Bold {
             }
         }
     }
+}
 
-    pub fn text(&self) -> &str {
+impl MdOperation for Bold {
+    fn text(&self) -> &str {
         self.text.trim_matches('*')
     }
 }
@@ -45,6 +47,7 @@ impl Bold {
 #[cfg(test)]
 mod tests {
     use super::Bold;
+    use super::MdOperation;
     #[allow(unused)]
     use jlogger_tracing::jdebug;
 
