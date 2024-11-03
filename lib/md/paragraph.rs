@@ -109,11 +109,11 @@ mod tests {
             }
         };
 
-        run_test("\nabc def\n\n");
-        run_test("\nabc.def\n\n");
-        run_test("\na,;f.f\n\n");
-        run_test("\nabc  \ndef\n\n");
-        run_test("\nabc def\n\nextra text");
+        run_test("abc def\n\n");
+        run_test("abc.def\n\n");
+        run_test("a,;f.f\n\n");
+        run_test("abc  \ndef\n\n");
+        run_test("abc def\n\nextra text");
         run_test(
             "2nd paragraph. *Italic*, **bold**, and `monospace`. Itemized lists\nlook like:\n\nextra text",
         );

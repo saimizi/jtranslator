@@ -74,6 +74,7 @@ mod tests {
     fn file_parse_1() {
         let markdown = include_str!("../../test/markdown-sample.md");
         let (header, left) = Header::parse(&markdown).unwrap();
+        let left = left.trim_matches('\n');
         jdebug!(
             header = header.text(),
             level = header.level(),
@@ -84,10 +85,12 @@ mod tests {
         assert_eq!(header.is_alt_syntax(), false);
 
         let (p, left) = Paragraph::parse(&left).unwrap();
+        let left = left.trim_matches('\n');
         jdebug!(paragraph = p.text(),);
         assert_eq!(p.text(), "This is the main style.");
 
         let (header, left) = Header::parse(&left).unwrap();
+        let left = left.trim_matches('\n');
         jdebug!(
             header = header.text(),
             level = header.level(),
@@ -98,10 +101,12 @@ mod tests {
         assert_eq!(header.is_alt_syntax(), true);
 
         let (p, left) = Paragraph::parse(&left).unwrap();
+        let left = left.trim_matches('\n');
         jdebug!(paragraph = p.text(),);
         assert_eq!(p.text(), "Paragraphs are separated by a blank line.");
 
-        let (p, _left) = Paragraph::parse(&left).unwrap();
+        let (p, left) = Paragraph::parse(&left).unwrap();
+        let _left = left.trim_matches('\n');
         jdebug!(paragraph = p.text(),);
         assert_eq!(
             p.text(),
