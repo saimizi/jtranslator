@@ -1,8 +1,13 @@
 pub mod bold;
 pub mod header;
 pub mod italic;
+pub mod item;
+pub mod normal;
 pub mod paragraph;
 
+use crate::error::JTranslateError;
+use crate::translate_text;
+use error_stack::Result;
 use pest_derive::Parser;
 use std::fmt::Display;
 
@@ -25,8 +30,28 @@ impl Display for Rule {
     }
 }
 
+pub trait MdOperation {
+    fn text(&self) -> &str {
+        ""
+    }
+
+    fn to_md_str(&self, translate: Option<(&str, &str)>) -> Result<String, JTranslateError> {
+        let mut result = String::new();
+
+        if let Some((from, to)) = translate {
+            let text = translate_text(self.text(), from, vec![to])?;
+            result.push_str(text[0].text());
+        } else {
+            result.push_str(self.text());
+        }
+
+        Ok(result)
+    }
+}
+
 #[cfg(test)]
 mod tests {
+    use super::MdOperation;
     use super::{header::Header, paragraph::Paragraph};
     use jlogger_tracing::{jdebug, JloggerBuilder, LevelFilter};
     use pest::Parser;
@@ -210,6 +235,7 @@ mod tests {
         run_test("**abc*", "");
         run_test("__abc", "");
         run_test("__abc_", "");
+        run_test("abc**def**", "");
     }
 
     #[test]
@@ -217,8 +243,7 @@ mod tests {
         let run_test = |test_str| assert!(MarkdownParser::parse(Rule::normal, test_str).is_err());
 
         run_test("\nabc");
-        run_test("**abc**");
-        run_test("__abc__");
+        run_test("\n\nabc");
     }
 
     #[test]
@@ -285,6 +310,5 @@ mod tests {
         run_test(" 1 item\n");
         run_test("a. item\n");
         run_test("a) item\n");
-
     }
 }

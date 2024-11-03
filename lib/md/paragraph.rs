@@ -1,4 +1,4 @@
-use super::{MarkdownParser, Rule};
+use super::{MarkdownParser, MdOperation, Rule};
 use jlogger_tracing::jdebug;
 use pest::Parser;
 
@@ -19,11 +19,9 @@ impl LineBreak {
             _ => None,
         }
     }
-
-    pub fn text(&self) -> &str {
-        ""
-    }
 }
+
+impl MdOperation for LineBreak {}
 
 pub struct Paragraph {
     text: String,
@@ -53,8 +51,10 @@ impl Paragraph {
             _ => None,
         }
     }
+}
 
-    pub fn text(&self) -> &str {
+impl MdOperation for Paragraph {
+    fn text(&self) -> &str {
         &self.text
     }
 }
@@ -62,7 +62,9 @@ impl Paragraph {
 #[cfg(test)]
 mod tests {
     use super::LineBreak;
+    use super::MdOperation;
     use super::Paragraph;
+
     #[allow(unused)]
     use jlogger_tracing::jdebug;
 
