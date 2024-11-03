@@ -257,4 +257,34 @@ mod tests {
         run_test("__ item\n");
         run_test("_ item");
     }
+
+    #[test]
+    fn number_item_1() {
+        let run_test = |test_str: &str, left: &str| {
+            let pair = MarkdownParser::parse(Rule::number_item, test_str).unwrap();
+            assert_eq!(pair.as_str(), test_str.trim_end_matches(left));
+        };
+
+        run_test("1. item\n", "");
+        run_test("1. item.\n", "");
+        run_test("1. Hello world! How are you? Great! \n", "");
+        run_test("1. **Hello world**!\n", "");
+        run_test("1. __Hello world__!\n", "");
+        run_test("1. item.\n\nabc", "\nabc");
+        run_test("  1. item.\n\nabc", "\nabc");
+        run_test("  1. item.\n \nabc", " \nabc");
+    }
+
+    #[test]
+    fn number_item_2() {
+        let run_test = |test_str: &str| {
+            assert!(MarkdownParser::parse(Rule::number_item, test_str).is_err());
+        };
+
+        run_test("1 item\n");
+        run_test(" 1 item\n");
+        run_test("a. item\n");
+        run_test("a) item\n");
+
+    }
 }
