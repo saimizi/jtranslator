@@ -16,8 +16,10 @@ linebreak=@{(" "{2} ~ NEWLINE | "<br>")}
 normal = {!(singlebreak | linebreak | list) ~ (bold | italic | words | MARK)+}
 emptyline = {NEWLINE{2}}
 paragraph = {!(singlebreak | linebreak) ~ ((singlebreak | linebreak){0,1} ~ normal)+ ~ emptyline}
-non_number_item = {WHITESPACE* ~ ("* " | "- " | "+ ") ~  normal+ ~ NEWLINE}
-number_item = {WHITESPACE* ~ ASCII_NONZERO_DIGIT ~ ASCII_DIGIT* ~ ". " ~ normal+ ~ NEWLINE}
+non_number_item_mark = {("* " | "- " | "+ ")}
+non_number_item = {WHITESPACE* ~ non_number_item_mark ~  normal+ ~ NEWLINE}
+number_item_mark = {ASCII_NONZERO_DIGIT ~ ASCII_DIGIT* ~ ". " }
+number_item = {WHITESPACE* ~ number_item_mark ~ normal+ ~ NEWLINE}
 itemlist = {(non_number_item+ | number_item+) }
 list = {itemlist}
 
