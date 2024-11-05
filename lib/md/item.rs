@@ -3,7 +3,6 @@ use std::usize;
 use super::MdOperation;
 #[allow(unused)]
 use super::{MarkdownParser, Rule};
-#[allow(unused)]
 use jlogger_tracing::jdebug;
 #[allow(unused)]
 use pest::Parser;
@@ -18,7 +17,7 @@ pub struct Item {
 
 impl Item {
     pub fn parse(input: &str) -> Option<(Self, &str)> {
-        if let Ok(pair) = MarkdownParser::parse(Rule::list, input) {
+        if let Ok(pair) = MarkdownParser::parse(Rule::item, input) {
             let mut item_end = 0_usize;
             let mut mark_start = 0_usize;
             let mut mark_end = 0_usize;
@@ -55,13 +54,18 @@ impl Item {
             }
 
             let left = &input[item_end..];
-            let level = input[..mark_start].len();
+            jdebug!(
+                mark_start = mark_start,
+                func = "Item::parse()",
+                line = line!()
+            );
+            let level = (input[..mark_start].len() / 2) + 1;
             let mark = if !is_number_item {
                 Some(input.chars().collect::<Vec<char>>()[mark_start])
             } else {
                 None
             };
-            let text = input[mark_end..].trim().to_owned();
+            let text = input[mark_end..item_end].trim().to_owned();
 
             Some((Self { text, mark, level }, left))
         } else {
@@ -76,6 +80,148 @@ impl Item {
     pub fn level(&self) -> usize {
         self.level
     }
+
+    pub fn mark(&self) -> Option<char> {
+        self.mark
+    }
 }
 
-impl MdOperation for Item {}
+impl MdOperation for Item {
+    fn text(&self) -> &str {
+        &self.text
+    }
+}
+
+#[cfg(test)]
+pub mod test {
+    use super::Item;
+    use super::MdOperation;
+
+    #[test]
+    fn item_1() {
+        let run_test = |test_str: &str,
+                        expect_text: &str,
+                        expect_mark: Option<char>,
+                        expect_level: usize,
+                        expect_left: &str| {
+            let (item, left) = Item::parse(test_str).unwrap();
+            assert_eq!(item.text(), expect_text);
+            assert_eq!(item.mark(), expect_mark);
+            assert_eq!(item.level(), expect_level);
+            assert_eq!(left, expect_left);
+        };
+
+        run_test(
+            "1. This is item of level 1.\n",
+            "This is item of level 1.",
+            None,
+            1,
+            "",
+        );
+        run_test(
+            "  1. This is item of level 2.\n",
+            "This is item of level 2.",
+            None,
+            2,
+            "",
+        );
+        run_test(
+            "    1. This is item of level 3.\n",
+            "This is item of level 3.",
+            None,
+            3,
+            "",
+        );
+        run_test(
+            "    1. This is item of level 3.\nabc",
+            "This is item of level 3.",
+            None,
+            3,
+            "abc",
+        );
+        run_test(
+            "2. This is item of level 1.\n",
+            "This is item of level 1.",
+            None,
+            1,
+            "",
+        );
+        run_test(
+            "  2. This is item of level 2.\n",
+            "This is item of level 2.",
+            None,
+            2,
+            "",
+        );
+        run_test(
+            "    3. This is item of level 3.\n",
+            "This is item of level 3.",
+            None,
+            3,
+            "",
+        );
+        run_test(
+            "* This is item of level 1.\n",
+            "This is item of level 1.",
+            Some('*'),
+            1,
+            "",
+        );
+        run_test(
+            "  * This is item of level 2.\n",
+            "This is item of level 2.",
+            Some('*'),
+            2,
+            "",
+        );
+        run_test(
+            "    * This is item of level 3.\n",
+            "This is item of level 3.",
+            Some('*'),
+            3,
+            "",
+        );
+        run_test(
+            "- This is item of level 1.\n",
+            "This is item of level 1.",
+            Some('-'),
+            1,
+            "",
+        );
+        run_test(
+            "  - This is item of level 2.\n",
+            "This is item of level 2.",
+            Some('-'),
+            2,
+            "",
+        );
+        run_test(
+            "    - This is item of level 3.\n",
+            "This is item of level 3.",
+            Some('-'),
+            3,
+            "",
+        );
+        run_test(
+            "+ This is item of level 1.\n",
+            "This is item of level 1.",
+            Some('+'),
+            1,
+            "",
+        );
+        run_test(
+            "  + This is item of level 2.\n",
+            "This is item of level 2.",
+            Some('+'),
+            2,
+            "",
+        );
+        run_test(
+            "    + This is item of level 3.\n",
+            "This is item of level 3.",
+            Some('+'),
+            3,
+            "",
+        );
+    }
+}
