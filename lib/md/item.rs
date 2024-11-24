@@ -1,5 +1,3 @@
-use std::usize;
-
 use super::MdOperation;
 #[allow(unused)]
 use super::{MarkdownParser, Rule};

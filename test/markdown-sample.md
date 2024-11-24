@@ -12,6 +12,9 @@ look like:
   * this one
   * that one
   * the other one
+    1. first one
+    2. second one
+    3. third one
 
 Note that --- not considering the asterisk --- the actual text
 content starts at 4-columns in.
