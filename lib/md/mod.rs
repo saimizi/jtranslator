@@ -51,6 +51,8 @@ pub trait MdOperation {
 
 #[cfg(test)]
 mod tests {
+    use crate::md::item::Item;
+
     use super::MdOperation;
     use super::{header::Header, paragraph::Paragraph};
     use jlogger_tracing::{jdebug, JloggerBuilder, LevelFilter};
@@ -106,12 +108,51 @@ mod tests {
         assert_eq!(p.text(), "Paragraphs are separated by a blank line.");
 
         let (p, left) = Paragraph::parse(&left).unwrap();
-        let _left = left.trim_matches('\n');
+        let left = left.trim_matches('\n');
         jdebug!(paragraph = p.text(),);
         assert_eq!(
             p.text(),
             "2nd paragraph. *Italic*, **bold**, and `monospace`. Itemized lists\nlook like:"
         );
+
+        let (p, left) = Item::parse(&left).unwrap();
+        let left = left.trim_matches('\n');
+        jdebug!(item = p.text(), number_type=format!("{:?}", p.number_item()), level=p.level());
+        assert_eq!(p.text(), "this one");
+
+        let (p, left) = Item::parse(&left).unwrap();
+        let left = left.trim_matches('\n');
+        jdebug!(item = p.text(), number_type=format!("{:?}", p.number_item()), level=p.level());
+        assert_eq!(p.text(), "that one");
+
+        let (p, left) = Item::parse(&left).unwrap();
+        let left = left.trim_matches('\n');
+        jdebug!(item = p.text(), number_type=format!("{:?}", p.number_item()), level=p.level());
+        assert_eq!(p.text(), "the other one");
+
+        let (p, left) = Item::parse(&left).unwrap();
+        let left = left.trim_matches('\n');
+        jdebug!(item = p.text(), number_type=format!("{:?}", p.number_item()), level=p.level());
+        assert_eq!(p.text(), "first one");
+
+        let (p, left) = Item::parse(&left).unwrap();
+        let left = left.trim_matches('\n');
+        jdebug!(item = p.text(), number_type=format!("{:?}", p.number_item()), level=p.level());
+        assert_eq!(p.text(), "second one");
+
+        let (p, left) = Item::parse(&left).unwrap();
+        let left = left.trim_matches('\n');
+        jdebug!(item = p.text(), number_type=format!("{:?}", p.number_item()), level=p.level());
+        assert_eq!(p.text(), "third one");
+
+        let (p, left) = Paragraph::parse(&left).unwrap();
+        let left = left.trim_matches('\n');
+        jdebug!(paragraph = p.text());
+        assert_eq!(
+            p.text(),
+            "Note that --- not considering the asterisk --- the actual text\ncontent starts at 4-columns in."
+        );
+
     }
 
     #[test]
