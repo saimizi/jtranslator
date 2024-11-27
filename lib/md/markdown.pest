@@ -23,4 +23,6 @@ number_item = {WHITESPACE* ~ number_item_mark ~ normal+ ~ NEWLINE}
 item = {(non_number_item | number_item) }
 itemlist = {(non_number_item+ | number_item+) }
 list = {itemlist}
+single_ref_mark = {">"}
+single_ref = {WHITESPACE* ~ single_ref_mark ~ normal+ ~ NEWLINE}
 

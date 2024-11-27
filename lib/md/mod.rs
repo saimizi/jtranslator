@@ -4,6 +4,7 @@ pub mod italic;
 pub mod item;
 pub mod normal;
 pub mod paragraph;
+pub mod reference;
 
 use crate::error::JTranslateError;
 use crate::translate_text;
@@ -54,7 +55,7 @@ mod tests {
     use crate::md::item::Item;
 
     use super::MdOperation;
-    use super::{header::Header, paragraph::Paragraph};
+    use super::{header::Header, paragraph::Paragraph, reference::MultipleLineRef};
     use jlogger_tracing::{jdebug, JloggerBuilder, LevelFilter};
     use pest::Parser;
     use pest_derive::Parser;
@@ -152,6 +153,15 @@ mod tests {
             p.text(),
             "Note that --- not considering the asterisk --- the actual text\ncontent starts at 4-columns in."
         );
+
+        let (p, left) = MultipleLineRef::parse(&left).unwrap();
+        let left = left.trim_matches('\n');
+        jdebug!(multi_line_ref = p.text());
+        assert_eq!(
+            p.text(),
+            "Block quotes are > abc\nwritten like so."
+        );
+
 
     }
 
