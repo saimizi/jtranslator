@@ -118,32 +118,56 @@ mod tests {
 
         let (p, left) = Item::parse(&left).unwrap();
         let left = left.trim_matches('\n');
-        jdebug!(item = p.text(), number_type=format!("{:?}", p.number_item()), level=p.level());
+        jdebug!(
+            item = p.text(),
+            number_type = format!("{:?}", p.number_item()),
+            level = p.level()
+        );
         assert_eq!(p.text(), "this one");
 
         let (p, left) = Item::parse(&left).unwrap();
         let left = left.trim_matches('\n');
-        jdebug!(item = p.text(), number_type=format!("{:?}", p.number_item()), level=p.level());
+        jdebug!(
+            item = p.text(),
+            number_type = format!("{:?}", p.number_item()),
+            level = p.level()
+        );
         assert_eq!(p.text(), "that one");
 
         let (p, left) = Item::parse(&left).unwrap();
         let left = left.trim_matches('\n');
-        jdebug!(item = p.text(), number_type=format!("{:?}", p.number_item()), level=p.level());
+        jdebug!(
+            item = p.text(),
+            number_type = format!("{:?}", p.number_item()),
+            level = p.level()
+        );
         assert_eq!(p.text(), "the other one");
 
         let (p, left) = Item::parse(&left).unwrap();
         let left = left.trim_matches('\n');
-        jdebug!(item = p.text(), number_type=format!("{:?}", p.number_item()), level=p.level());
+        jdebug!(
+            item = p.text(),
+            number_type = format!("{:?}", p.number_item()),
+            level = p.level()
+        );
         assert_eq!(p.text(), "first one");
 
         let (p, left) = Item::parse(&left).unwrap();
         let left = left.trim_matches('\n');
-        jdebug!(item = p.text(), number_type=format!("{:?}", p.number_item()), level=p.level());
+        jdebug!(
+            item = p.text(),
+            number_type = format!("{:?}", p.number_item()),
+            level = p.level()
+        );
         assert_eq!(p.text(), "second one");
 
         let (p, left) = Item::parse(&left).unwrap();
         let left = left.trim_matches('\n');
-        jdebug!(item = p.text(), number_type=format!("{:?}", p.number_item()), level=p.level());
+        jdebug!(
+            item = p.text(),
+            number_type = format!("{:?}", p.number_item()),
+            level = p.level()
+        );
         assert_eq!(p.text(), "third one");
 
         let (p, left) = Paragraph::parse(&left).unwrap();
@@ -159,10 +183,15 @@ mod tests {
         jdebug!(multi_line_ref = p.text());
         assert_eq!(
             p.text(),
-            "Block quotes are > abc\nwritten like so."
+            "Block quotes are > abc\nwritten like so.\n\nThey can span multiple paragraphs,\nif you like."
         );
 
-
+        let (p, left) = Paragraph::parse(&left).unwrap();
+        let left = left.trim_matches('\n');
+        jdebug!(paragraph = p.text());
+        assert_eq!(
+        p.text(),
+        "Use 3 dashes for an em-dash. Use 2 dashes for ranges (ex., \"it's all\nin chapters 12--14\"). Three dots ... will be converted to an ellipsis.\nUnicode is supported.");
     }
 
     #[test]
