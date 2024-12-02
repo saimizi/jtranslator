@@ -117,5 +117,9 @@ mod tests {
         run_test(
             "2nd paragraph. *Italic*, **bold**, and `monospace`. Itemized lists\nlook like:\n\nextra text",
         );
+        run_test(
+            "Use 3 dashes for an em-dash. Use 2 dashes for ranges (ex., \"it's all\nin chapters 12--14\"). Three dots ... will be converted to an ellipsis.\nUnicode is supported.\n\n"
+
+            );
     }
 }

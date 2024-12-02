@@ -9,7 +9,12 @@ pub mod reference;
 use crate::error::JTranslateError;
 use crate::translate_text;
 use error_stack::Result;
+pub use header::Header;
+pub use item::Item;
+use jlogger_tracing::{jdebug, jerror, jinfo, JloggerBuilder, LevelFilter};
+pub use paragraph::Paragraph;
 use pest_derive::Parser;
+pub use reference::MultipleLineRef;
 use std::fmt::Display;
 
 #[derive(Parser)]
@@ -48,6 +53,64 @@ pub trait MdOperation {
 
         Ok(result)
     }
+}
+
+pub enum MdEntry {
+    Header(header::Header),
+    Paragraph(paragraph::Paragraph),
+    Item(item::Item),
+    MultipleLineRef(reference::MultipleLineRef),
+}
+
+pub fn md_parse(text: &str) -> Result<Vec<MdEntry>, JTranslateError> {
+    let mut result = vec![];
+    let mut text = text;
+    loop {
+        jdebug!(func = "md_parse", line = line!());
+        if text.is_empty() {
+            break;
+        }
+
+        if let Some((header, l)) = header::Header::parse(text) {
+            result.push(MdEntry::Header(header));
+            text = l.trim_start();
+            jdebug!(matched = "header", left = text);
+            continue;
+        } else {
+            jdebug!(no_matched = "header", text = text);
+        }
+
+        if let Some((paragraph, l)) = paragraph::Paragraph::parse(text) {
+            result.push(MdEntry::Paragraph(paragraph));
+            text = l.trim_start();
+            jdebug!(matched = "paragraph", left = text);
+            continue;
+        } else {
+            jdebug!(no_matched = "paragraph", text = text);
+        }
+
+        if let Some((item, l)) = item::Item::parse(text) {
+            result.push(MdEntry::Item(item));
+            text = l.trim_start();
+            jdebug!(matched = "item", left = text);
+            continue;
+        } else {
+            jdebug!(no_matched = "item", text = text);
+        }
+
+        if let Some((reference, l)) = reference::MultipleLineRef::parse(text) {
+            result.push(MdEntry::MultipleLineRef(reference));
+            text = l.trim_start();
+            jdebug!(matched = "reference", left = text);
+            continue;
+        } else {
+            jdebug!(no_matched = "reference", text = text);
+        }
+
+        panic!("invalid string: {}", text);
+    }
+
+    Ok(result)
 }
 
 #[cfg(test)]
