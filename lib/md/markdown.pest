@@ -1,0 +1,28 @@
+WHITESPACE = _{(" " | "\t")}
+MARK = { !ASCII_ALPHANUMERIC ~ !NEWLINE ~ ASCII }
+word ={ ASCII_ALPHANUMERIC+ }
+words = { word ~ (WHITESPACE+ ~ word)* }
+headings1 = {("# " | "## " | "### " | "#### " | "##### " | "###### ") ~ (words | MARK)+ ~ NEWLINE}
+headings2 = {NEWLINE* ~ (words | MARK)+ ~ NEWLINE ~ ("=="+ | "--"+) ~ NEWLINE}
+headings = { (headings1 | headings2)}
+italic1 = {"*" ~ (words | (!"*" ~ MARK))+ ~ "*"}
+italic2 = {"_" ~ (words | (!"_" ~ MARK))+ ~ "_"}
+italic = { (italic1 | italic2) }
+bold1 = {"*"{2} ~ (words | (!"*"{2} ~ MARK))+ ~ "*"{2}}
+bold2 = {"_"{2} ~ (words | (!"_"{2} ~ MARK))+ ~ "_"{2}}
+bold = { (bold1 | bold2) }
+singlebreak={NEWLINE{1}}
+linebreak=@{(" "{2} ~ NEWLINE | "<br>")}
+normal = {!(singlebreak | linebreak | list) ~ (bold | italic | words | MARK)+}
+emptyline = {NEWLINE{2}}
+paragraph = {!(singlebreak | linebreak | ">") ~ ((singlebreak | linebreak){0,1} ~ normal)+ ~ emptyline}
+non_number_item_mark = {("* " | "- " | "+ ")}
+non_number_item = {WHITESPACE* ~ non_number_item_mark ~  normal+ ~ NEWLINE}
+number_item_mark = {ASCII_NONZERO_DIGIT ~ ASCII_DIGIT* ~ ". " }
+number_item = {WHITESPACE* ~ number_item_mark ~ normal+ ~ NEWLINE}
+item = {(non_number_item | number_item) }
+itemlist = {(non_number_item+ | number_item+) }
+list = {itemlist}
+single_ref_mark = {">"}
+single_ref = {WHITESPACE* ~ single_ref_mark ~ normal* ~ NEWLINE}
+
