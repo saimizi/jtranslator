@@ -58,7 +58,7 @@ fn process_md_file(file: &str, from: &str, to: &str) -> Result<(), JTranslateErr
     let entries = md_parse(&text)?;
 
     for to in outputs {
-        jdebug!(func="process_md_file", line=line!());
+        jdebug!(func = "process_md_file", line = line!());
         for entry in &entries {
             match entry {
                 MdEntry::Header(h) => {
@@ -72,6 +72,9 @@ fn process_md_file(file: &str, from: &str, to: &str) -> Result<(), JTranslateErr
                 }
                 MdEntry::MultipleLineRef(r) => {
                     println!("{}", r.to_md_str(Some((from, to)))?)
+                }
+                MdEntry::NewLine => {
+                    println!();
                 }
             }
         }

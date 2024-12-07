@@ -1,3 +1,4 @@
+use super::translate_text;
 use super::MdOperation;
 #[allow(unused)]
 use super::{MarkdownParser, Rule};
@@ -84,6 +85,22 @@ impl MultipleLineRef {
 impl MdOperation for MultipleLineRef {
     fn text(&self) -> &str {
         &self.buf
+    }
+
+    fn to_md_str(
+        &self,
+        translate: Option<(&str, &str)>,
+    ) -> error_stack::Result<String, crate::error::JTranslateError> {
+        let mut result = String::from("> ");
+        if let Some((from, to)) = translate {
+            let text = translate_text(self.text(), from, vec![to])?;
+            result.push_str(text[0].text());
+        } else {
+            result.push_str(self.text());
+        }
+        let mut result = result.replace("\n", "\n> ");
+        result.push('\n');
+        Ok(result)
     }
 }
 

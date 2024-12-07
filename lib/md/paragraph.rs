@@ -33,8 +33,11 @@ impl Paragraph {
         match MarkdownParser::parse(Rule::paragraph, input) {
             Ok(pair) => {
                 let matched = pair.as_str();
-                let index = matched.len();
+                // matched include "\n\n"
+                let index = matched.len() - 1;
+                jdebug!(func = "Paragraph::parse", matched = matched, index = index);
                 let left = &input[index..];
+                let matched = matched.replace("\n", " ");
                 jdebug!(
                     matched = matched,
                     func = "Paragraph::parse()",
@@ -95,31 +98,22 @@ mod tests {
 
     #[test]
     fn paragraph_1() {
-        let run_test = |test_str: &str| {
+        let run_test = |test_str: &str, expected: &str, expected_left: &str| {
             let (p, left) = Paragraph::parse(test_str).unwrap();
-            let end = test_str.find("\n\n").unwrap();
-            let text = test_str[..end].trim();
-            let expected_left = &test_str[end + 2..];
-
-            assert_eq!(p.text(), text);
-            if expected_left.is_empty() {
-                assert!(left.is_empty());
-            } else {
-                assert_eq!(left, expected_left);
-            }
+            assert_eq!(p.text(), expected);
+            assert_eq!(left, expected_left);
         };
 
-        run_test("abc def\n\n");
-        run_test("abc.def\n\n");
-        run_test("a,;f.f\n\n");
-        run_test("abc  \ndef\n\n");
-        run_test("abc def\n\nextra text");
+        run_test("abc def\n\n", "abc def", "\n");
+        run_test("abc.def\n\n", "abc.def", "\n");
+        run_test("a,;f.f\n\n", "a,;f.f", "\n");
+        run_test("abc  \ndef\n\n", "abc   def", "\n");
+        run_test("abc def\n\nextra text", "abc def", "\nextra text");
         run_test(
             "2nd paragraph. *Italic*, **bold**, and `monospace`. Itemized lists\nlook like:\n\nextra text",
-        );
+            "2nd paragraph. *Italic*, **bold**, and `monospace`. Itemized lists look like:", "\nextra text");
         run_test(
-            "Use 3 dashes for an em-dash. Use 2 dashes for ranges (ex., \"it's all\nin chapters 12--14\"). Three dots ... will be converted to an ellipsis.\nUnicode is supported.\n\n"
-
-            );
+            "Use 3 dashes for an em-dash. Use 2 dashes for ranges (ex., \"it's all\nin chapters 12--14\"). Three dots ... will be converted to an ellipsis.\nUnicode is supported.\n\n",
+            "Use 3 dashes for an em-dash. Use 2 dashes for ranges (ex., \"it's all in chapters 12--14\"). Three dots ... will be converted to an ellipsis. Unicode is supported.", "\n");
     }
 }

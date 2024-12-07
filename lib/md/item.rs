@@ -1,3 +1,5 @@
+use super::translate_text;
+use super::JTranslateError;
 use super::MdOperation;
 #[allow(unused)]
 use super::{MarkdownParser, Rule};
@@ -87,6 +89,30 @@ impl Item {
 impl MdOperation for Item {
     fn text(&self) -> &str {
         &self.text
+    }
+
+    fn to_md_str(
+        &self,
+        translate: Option<(&str, &str)>,
+    ) -> error_stack::Result<String, crate::error::JTranslateError> {
+        let mut result = String::new();
+        let spaces: String = (0..self.level()).into_iter().map(|_| "  ").collect();
+        jdebug!(level = self.level(), spaces = format!("-{spaces}-"));
+        result.push_str(&spaces);
+
+        if let Some(m) = self.mark() {
+            result.push_str(&format!("{m} "));
+        } else {
+            result.push_str("1. ");
+        }
+
+        if let Some((from, to)) = translate {
+            let text = translate_text(self.text(), from, vec![to])?;
+            result.push_str(text[0].text());
+        } else {
+            result.push_str(self.text());
+        }
+        Ok(result)
     }
 }
 

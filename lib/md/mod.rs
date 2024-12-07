@@ -51,6 +51,8 @@ pub trait MdOperation {
             result.push_str(self.text());
         }
 
+        result.push('\n');
+
         Ok(result)
     }
 }
@@ -60,20 +62,30 @@ pub enum MdEntry {
     Paragraph(paragraph::Paragraph),
     Item(item::Item),
     MultipleLineRef(reference::MultipleLineRef),
+    NewLine,
 }
 
 pub fn md_parse(text: &str) -> Result<Vec<MdEntry>, JTranslateError> {
     let mut result = vec![];
     let mut text = text;
     loop {
-        jdebug!(func = "md_parse", line = line!());
+        jdebug!(func = "md_parse", line = line!(), text = text);
+        loop {
+            if text.starts_with("\n") {
+                result.push(MdEntry::NewLine);
+                text = &text[1..];
+            } else {
+                break;
+            }
+        }
+
         if text.is_empty() {
             break;
         }
 
         if let Some((header, l)) = header::Header::parse(text) {
             result.push(MdEntry::Header(header));
-            text = l.trim_start();
+            text = l;
             jdebug!(matched = "header", left = text);
             continue;
         } else {
@@ -82,7 +94,7 @@ pub fn md_parse(text: &str) -> Result<Vec<MdEntry>, JTranslateError> {
 
         if let Some((paragraph, l)) = paragraph::Paragraph::parse(text) {
             result.push(MdEntry::Paragraph(paragraph));
-            text = l.trim_start();
+            text = l;
             jdebug!(matched = "paragraph", left = text);
             continue;
         } else {
@@ -91,7 +103,7 @@ pub fn md_parse(text: &str) -> Result<Vec<MdEntry>, JTranslateError> {
 
         if let Some((item, l)) = item::Item::parse(text) {
             result.push(MdEntry::Item(item));
-            text = l.trim_start();
+            text = l;
             jdebug!(matched = "item", left = text);
             continue;
         } else {
@@ -100,14 +112,14 @@ pub fn md_parse(text: &str) -> Result<Vec<MdEntry>, JTranslateError> {
 
         if let Some((reference, l)) = reference::MultipleLineRef::parse(text) {
             result.push(MdEntry::MultipleLineRef(reference));
-            text = l.trim_start();
+            text = l;
             jdebug!(matched = "reference", left = text);
             continue;
         } else {
             jdebug!(no_matched = "reference", text = text);
         }
 
-        panic!("invalid string: {}", text);
+        panic!("invalid string: -{}-", text);
     }
 
     Ok(result)
@@ -176,7 +188,7 @@ mod tests {
         jdebug!(paragraph = p.text(),);
         assert_eq!(
             p.text(),
-            "2nd paragraph. *Italic*, **bold**, and `monospace`. Itemized lists\nlook like:"
+            "2nd paragraph. *Italic*, **bold**, and `monospace`. Itemized lists look like:"
         );
 
         let (p, left) = Item::parse(&left).unwrap();
@@ -238,7 +250,7 @@ mod tests {
         jdebug!(paragraph = p.text());
         assert_eq!(
             p.text(),
-            "Note that --- not considering the asterisk --- the actual text\ncontent starts at 4-columns in."
+            "Note that --- not considering the asterisk --- the actual text content starts at 4-columns in."
         );
 
         let (p, left) = MultipleLineRef::parse(&left).unwrap();
@@ -254,7 +266,7 @@ mod tests {
         jdebug!(paragraph = p.text());
         assert_eq!(
         p.text(),
-        "Use 3 dashes for an em-dash. Use 2 dashes for ranges (ex., \"it's all\nin chapters 12--14\"). Three dots ... will be converted to an ellipsis.\nUnicode is supported.");
+        "Use 3 dashes for an em-dash. Use 2 dashes for ranges (ex., \"it's all in chapters 12--14\"). Three dots ... will be converted to an ellipsis. Unicode is supported.");
     }
 
     #[test]
