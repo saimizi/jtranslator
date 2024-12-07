@@ -1,7 +1,8 @@
 use clap::Parser;
 use error_stack::{Report, Result};
 use jlogger_tracing::{jdebug, jerror, jinfo, JloggerBuilder, LevelFilter};
-use translib::md::{self, md_parse, MdEntry, MdOperation};
+use translib::md::MdEntry;
+use translib::md::{md_parse, MdOperation};
 use translib::{error::JTranslateError, translate_text};
 
 #[derive(Parser, Debug)]
@@ -29,7 +30,7 @@ struct Cli {
 
 fn process_text(text: &str, from: &str, to: &str) -> Result<(), JTranslateError> {
     let outputs = to.split(',').collect();
-    match translate_text(&text, &from, outputs) {
+    match translate_text(text, from, outputs) {
         Ok(translated) => {
             for entry in translated.iter() {
                 jinfo!(Language = entry.language());

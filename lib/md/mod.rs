@@ -11,7 +11,7 @@ use crate::translate_text;
 use error_stack::Result;
 pub use header::Header;
 pub use item::Item;
-use jlogger_tracing::{jdebug, jerror, jinfo, JloggerBuilder, LevelFilter};
+use jlogger_tracing::jdebug;
 pub use paragraph::Paragraph;
 use pest_derive::Parser;
 pub use reference::MultipleLineRef;
@@ -262,7 +262,7 @@ mod tests {
         );
 
         let (p, left) = Paragraph::parse(&left).unwrap();
-        let left = left.trim_matches('\n');
+        let _left = left.trim_matches('\n');
         jdebug!(paragraph = p.text());
         assert_eq!(
         p.text(),

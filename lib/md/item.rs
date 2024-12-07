@@ -1,5 +1,4 @@
 use super::translate_text;
-use super::JTranslateError;
 use super::MdOperation;
 #[allow(unused)]
 use super::{MarkdownParser, Rule};
@@ -96,7 +95,7 @@ impl MdOperation for Item {
         translate: Option<(&str, &str)>,
     ) -> error_stack::Result<String, crate::error::JTranslateError> {
         let mut result = String::new();
-        let spaces: String = (0..self.level()).into_iter().map(|_| "  ").collect();
+        let spaces: String = (0..self.level()).map(|_| "  ").collect();
         jdebug!(level = self.level(), spaces = format!("-{spaces}-"));
         result.push_str(&spaces);
 
